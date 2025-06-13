@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         themePrefs = ThemePreferenceManager(this)
         isDarkTheme = themePrefs.loadThemePreference()
 
@@ -48,13 +49,20 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        binding.toolbar.title = "List of items"
+        getSupportActionBar()?.setTitle(R.string.title);
 
+        //setting menu items for dark and light mode and search
         setupMenu()
 
+        //setting the adapter
         adapter = GitRepoListAdapter(this)
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
 
+        //fetching data from api
+        viewModel.getRepoList()
+        //observe data and set in list
         observeData()
 
         adapter.setOnClickListener(object : RepoClickListener {
@@ -134,10 +142,18 @@ class MainActivity : AppCompatActivity() {
 
         // Load cached data from Room
         viewModel.listItemRoom.observe(this) { list ->
-            if (!list.isNullOrEmpty()) {
+            if (list.isNullOrEmpty() && viewModel.isSearching) {
+                // Hide RecyclerView and show empty message
+                binding.recyclerView.isVisible = false
+                binding.error.text = "No results found"
+                binding.error.isVisible = true
+            } else {
+                binding.recyclerView.isVisible = true
+                binding.error.isVisible = false
                 adapter.submitList(list)
             }
         }
+
     }
 
     override fun onDestroy() {

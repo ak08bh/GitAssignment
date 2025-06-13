@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Assignment</string>
     <string name="search_title">Search with id and name\n</string>
+    <string name="title">"List of items"</string>
 </resources>

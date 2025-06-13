@@ -6,40 +6,43 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 
 class WebViewActivity : AppCompatActivity() {
+
+    private lateinit var webView: WebView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web_view)
 
-        val url = intent.getStringExtra("url")
+        val url = intent.getStringExtra("url") ?: "https://www.google.com"
 
-        val webView: WebView = findViewById(R.id.webView)
-        val progress: ProgressBar = findViewById(R.id.progress)
+        webView = findViewById(R.id.webView)
+        progressBar = findViewById(R.id.progress)
 
-        webView.apply {
-            settings.loadsImagesAutomatically = true
-            settings.javaScriptEnabled = true
-            scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
+        // Show loader before starting
+        progressBar.visibility = View.VISIBLE
 
-            // Custom WebViewClient
-            webViewClient = object : WebViewClient() {
-                override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    progress.isVisible = true
-                }
+        webView.settings.javaScriptEnabled = true
+        webView.settings.loadsImagesAutomatically = true
+        webView.scrollBarStyle = View.SCROLLBARS_INSIDE_OVERLAY
 
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    progress.isVisible = false
-                }
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                progressBar.visibility = View.VISIBLE
             }
 
-            if (url != null) {
-                loadUrl(url)
+            override fun onPageFinished(view: WebView?, url: String?) {
+                progressBar.visibility = View.GONE
+            }
+
+            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+                progressBar.visibility = View.GONE
+                super.onReceivedError(view, errorCode, description, failingUrl)
             }
         }
+
+        webView.loadUrl(url)
     }
 }

@@ -5,7 +5,6 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.assignment.Network.NetworkRepository
 import com.example.assignment.Network.NetworkRepositoryImpl
 import com.example.assignment.model.Item
 import com.example.assignment.model.ResponseModel
@@ -19,11 +18,13 @@ class GitRepoViewModel(private val networkRepository: NetworkRepositoryImpl) : V
 
     val list : LiveData<ResponseModel<List<Item>>> get() = _list
 
+    //using MediatorLiveData for data in search and list from room db
     private val _listItemRoom = MediatorLiveData<List<Item>>()
 
     val listItemRoom: LiveData<List<Item>> get() = _listItemRoom
 
     private var currentScore: LiveData<List<Item>>? = null
+    var isSearching = false
 
     init {
         val initialSource = networkRepository.getListDataRoom()
@@ -57,7 +58,8 @@ class GitRepoViewModel(private val networkRepository: NetworkRepositoryImpl) : V
         }
     }
 
-    fun getSearchData(query: String){
+    fun getSearchData(query: String) {
+        isSearching = query.isNotEmpty()
 
         val newSource: LiveData<List<Item>> = if (query.isEmpty()) {
             networkRepository.getListDataRoom()
@@ -65,14 +67,15 @@ class GitRepoViewModel(private val networkRepository: NetworkRepositoryImpl) : V
             networkRepository.getSearchData(query)
         }
 
-        currentScore?.let{
-            _listItemRoom.removeSource(currentScore!!)
+        currentScore?.let {
+            _listItemRoom.removeSource(it)
         }
 
         currentScore = newSource
 
-        _listItemRoom.addSource(newSource){
+        _listItemRoom.addSource(newSource) {
             _listItemRoom.value = it
         }
     }
+
 }

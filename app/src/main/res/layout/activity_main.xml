@@ -24,7 +24,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/list_item" />
+        tools:listitem="@layout/list_item"
+        android:layout_margin="10dp"/>
 
     <ProgressBar
         android:id="@+id/progress"
